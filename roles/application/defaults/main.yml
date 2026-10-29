@@ -1,0 +1,12 @@
+---
+app_deploy_dir: /opt/vps-bootstrap
+app_http_port: 8080
+app_compose_project: vps-bootstrap
+
+app_db_name: appdb
+app_db_user: appuser
+app_db_password: ""
+app_db_volume: app_postgres_data
+
+app_demo_username: demo
+app_demo_password: ""

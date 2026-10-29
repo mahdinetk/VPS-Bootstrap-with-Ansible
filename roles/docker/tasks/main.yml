@@ -1,0 +1,26 @@
+---
+- name: Install Docker packages
+  ansible.builtin.apt:
+    name: "{{ docker_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+  become: true
+
+- name: Ensure Docker service is enabled and running
+  ansible.builtin.service:
+    name: "{{ docker_service_name }}"
+    enabled: "{{ docker_service_enabled }}"
+    state: "{{ docker_service_state }}"
+  become: true
+
+- name: Configure Docker logging
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: "0644"
+    validate: "dockerd --validate --config-file %s"
+  become: true
+  notify: Restart Docker

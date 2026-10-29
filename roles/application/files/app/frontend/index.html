@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login</title>
+</head>
+<body>
+  <h1>Login</h1>
+
+  <form id="login-form">
+    <label>
+      Username
+      <input name="username" autocomplete="username" required>
+    </label>
+    <br>
+    <label>
+      Password
+      <input name="password" type="password"
+             autocomplete="current-password" required>
+    </label>
+    <br>
+    <button type="submit">Login</button>
+  </form>
+
+  <p id="message" role="status"></p>
+
+  <script>
+    document.getElementById("login-form").addEventListener("submit",
+      async (event) => {
+        event.preventDefault();
+
+        const form = new FormData(event.target);
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            username: form.get("username"),
+            password: form.get("password")
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          window.location.href = "/success.html";
+        } else {
+          document.getElementById("message").textContent =
+            result.message || "Login failed";
+        }
+      });
+  </script>
+</body>
+</html>

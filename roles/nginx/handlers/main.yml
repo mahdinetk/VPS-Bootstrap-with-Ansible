@@ -1,0 +1,7 @@
+---
+- name: Reload Nginx container
+  community.docker.docker_container:
+    name: vps-bootstrap-web
+    state: started
+    restart: true
+  become: true

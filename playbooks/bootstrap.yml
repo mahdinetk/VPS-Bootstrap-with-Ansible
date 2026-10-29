@@ -1,0 +1,8 @@
+---
+- name: Bootstrap server prerequisites
+  hosts: all
+  gather_facts: true
+
+  roles:
+    - common
+    - docker

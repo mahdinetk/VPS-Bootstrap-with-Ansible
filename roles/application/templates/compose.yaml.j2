@@ -1,0 +1,56 @@
+services:
+  web:
+    image: nginx:alpine
+    container_name: vps-bootstrap-web
+    restart: unless-stopped
+    ports:
+      - "{{ app_http_port }}:80"
+    volumes:
+      - "{{ app_deploy_dir }}/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro"
+      - "{{ app_deploy_dir }}/app/frontend:/usr/share/nginx/html:ro"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - app_network
+
+  backend:
+    build: ./app/backend
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      POSTGRES_DB: {{ app_db_name | to_json }}
+      POSTGRES_USER: {{ app_db_user | to_json }}
+      POSTGRES_PASSWORD: {{ app_db_password | to_json }}
+      DEMO_USERNAME: {{ app_demo_username | to_json }}
+      DEMO_PASSWORD: {{ app_demo_password | to_json }}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app_network
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: {{ app_db_name | to_json }}
+      POSTGRES_USER: {{ app_db_user | to_json }}
+      POSTGRES_PASSWORD: {{ app_db_password | to_json }}
+    volumes:
+      - "{{ app_db_volume }}:/var/lib/postgresql/data"
+      - "{{ app_deploy_dir }}/app/database/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  {{ app_db_volume }}:

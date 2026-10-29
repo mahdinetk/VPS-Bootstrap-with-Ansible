@@ -1,0 +1,13 @@
+---
+docker_packages:
+  - docker.io
+
+docker_service_name: docker
+
+docker_service_enabled: true
+
+docker_service_state: started
+
+docker_log_driver: json-file
+docker_log_max_size: "10m"
+docker_log_max_file: "3"

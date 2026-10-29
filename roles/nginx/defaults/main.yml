@@ -1,0 +1,5 @@
+---
+nginx_config_dir: /opt/vps-bootstrap/nginx
+nginx_backend_host: backend
+nginx_backend_port: 8000
+nginx_client_max_body_size: 1m

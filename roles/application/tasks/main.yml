@@ -1,0 +1,59 @@
+---
+- name: Validate required secrets
+  ansible.builtin.assert:
+    that:
+      - app_db_password | length >= 16
+      - app_demo_password | length >= 16
+      - app_db_password != app_demo_password
+    fail_msg: "Provide two different passwords, each at least 16 characters long."
+  no_log: true
+
+- name: Create application directory
+  ansible.builtin.file:
+    path: "{{ app_deploy_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  become: true
+
+- name: Copy application source files
+  ansible.builtin.copy:
+    src: app/
+    dest: "{{ app_deploy_dir }}/app/"
+    owner: root
+    group: root
+    mode: "0644"
+    directory_mode: "0755"
+  become: true
+  register: app_files
+
+- name: Render Docker Compose configuration
+  ansible.builtin.template:
+    src: compose.yaml.j2
+    dest: "{{ app_deploy_dir }}/compose.yaml"
+    owner: root
+    group: root
+    mode: "0600"
+  become: true
+  no_log: true
+  register: compose_config
+
+- name: Rebuild and deploy when configuration or source changes
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_deploy_dir }}"
+    project_name: "{{ app_compose_project }}"
+    state: present
+    build: always
+  become: true
+  no_log: true
+  when: app_files.changed or compose_config.changed
+
+- name: Ensure application stack is running
+  community.docker.docker_compose_v2:
+    project_src: "{{ app_deploy_dir }}"
+    project_name: "{{ app_compose_project }}"
+    state: present
+    build: never
+  become: true
+  no_log: true

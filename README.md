@@ -146,7 +146,3 @@ Use the demo credentials configured in your encrypted Vault variables.
 - Introduce a dedicated secrets management solution.
 - Add CI/CD integration.
 - Implement automated backups and recovery testing.
-
-## License
-
-Choose a license before permitting reuse or redistribution of this project.
